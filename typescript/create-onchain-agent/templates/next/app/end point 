@@ -1,0 +1,11 @@
+AgentKit, 
+    AgentKitConfig, 
+    CdpWalletProvider, 
+    CdpWalletProviderConfig
+)
+
+wallet_provider = CdpWalletProvider(CdpWalletProviderConfig(
+    api_key_name="CDP API KEY NAME",
+    api_key_private="CDP API KEY PRIVATE KEY",
+    network_id="base-mainnet"
+))
