@@ -1,6 +1,58 @@
 # Coinbase AgentKit Changelog
 
-## Unreleased
+<!-- towncrier release notes start -->
+
+## [0.3.0] - 2025-03-28
+
+### Fixed
+
+- Fixed ERC20 transfer checksum validation by properly converting both contract and destination addresses to EIP-55 format to prevent Web3.py validation errors. ([#514](https://github.com/coinbase/agentkit/pull/514))
+
+### Added
+
+- Added Nillion SecretVault action ([#279](https://github.com/coinbase/agentkit/pull/279))
+
+
+## [0.2.0] - 2025-03-14
+
+### Fixed
+
+- Fixed bug in Morpho action provider to allow depositing ERC20 tokens of variable decimal precision ([#573](https://github.com/coinbase/agentkit/pull/573))
+
+### Added
+
+- Added Allora Network action provider ([#110](https://github.com/coinbase/agentkit/pull/110))
+- Added Hyperbolic action providers for AI, Billing, Marketplace, and Settings
+- Added SSH action provider for connecting, running remote commands, downloading and uploading
+
+
+## [0.1.6] - 2025-03-11
+
+### Added
+
+- Added edwards key support via updating cdp-sdk version
+
+
+## [0.1.5] - 2025-03-07
+
+### Fixed
+
+- Fixed Compound borrow action ([#496](https://github.com/coinbase/agentkit/pull/496))
+
+
+## [0.1.4] - 2025-02-28
+
+### Added
+
+- Added new action provider to interact with Compound Finance (#477)
+- Added SmartWalletProvider powered by CDP Smart Wallets (#472)
+- Added `rpc_url` to `EthAccountWalletProvider` configurable options. (#474)
+
+### Fixed
+
+- Fixed under-reporting bug to ensure all CDP API usage is properly attributed to "agentkit" source and source version (#488)
+- Used network id from saved wallet (#486)
+- Fixed erc20 `get_balance` action to format erc20 balance with correct number of decimals. (#467)
 
 ## [0.1.3] - 2025-02-21
 

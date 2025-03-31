@@ -41,13 +41,20 @@ class ERC20ActionProvider(ActionProvider[EvmWalletProvider]):
             validated_args = GetBalanceSchema(**args)
 
             balance = wallet_provider.read_contract(
-                contract_address=validated_args.contract_address,
+                contract_address=Web3.to_checksum_address(validated_args.contract_address),
                 abi=ERC20_ABI,
                 function_name="balanceOf",
                 args=[wallet_provider.get_address()],
             )
 
-            return f"Balance of {validated_args.contract_address} is {balance}"
+            decimals = wallet_provider.read_contract(
+                contract_address=validated_args.contract_address,
+                abi=ERC20_ABI,
+                function_name="decimals",
+                args=[],
+            )
+
+            return f"Balance of {validated_args.contract_address} is {balance / 10 ** decimals}"
         except Exception as e:
             return f"Error getting balance: {e!s}"
 
@@ -81,14 +88,18 @@ class ERC20ActionProvider(ActionProvider[EvmWalletProvider]):
         try:
             validated_args = TransferSchema(**args)
 
-            contract = Web3().eth.contract(address=validated_args.contract_address, abi=ERC20_ABI)
+            w3 = Web3()
+            checksum_contract = w3.to_checksum_address(validated_args.contract_address)
+            checksum_destination = w3.to_checksum_address(validated_args.destination)
+
+            contract = w3.eth.contract(address=checksum_contract, abi=ERC20_ABI)
             data = contract.encode_abi(
-                "transfer", [validated_args.destination, int(validated_args.amount)]
+                "transfer", [checksum_destination, int(validated_args.amount)]
             )
 
             tx_hash = wallet_provider.send_transaction(
                 {
-                    "to": validated_args.contract_address,
+                    "to": checksum_contract,
                     "data": data,
                 }
             )

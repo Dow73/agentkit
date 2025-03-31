@@ -1,6 +1,64 @@
 # AgentKit Changelog
 
-## Unreleased
+## 0.5.0
+
+### Minor Changes
+
+- [#584](https://github.com/coinbase/agentkit/pull/584) [`6d8ac5b`](https://github.com/coinbase/agentkit/commit/6d8ac5b6608fafe1ee4256caac3ad93659d87c8b) Thanks [@CarsonRoscoe](https://github.com/CarsonRoscoe)! - Added gasless transfers for USDC/CBBTC on Base/Base-Sepolia
+
+- [#566](https://github.com/coinbase/agentkit/pull/566) [`bfd6442`](https://github.com/coinbase/agentkit/commit/bfd6442df09247efe2b3d378ca3e49c123b19f8c) Thanks [@phdargen](https://github.com/phdargen)! - Added AcrossActionProvider to allow bridging tokens using the Across protocol
+
+  - `bridge_token` action to bridge native and ERC20 tokens
+  - `check_deposit_status` action to check the status of bridge deposits
+
+- [#618](https://github.com/coinbase/agentkit/pull/618) [`155d468`](https://github.com/coinbase/agentkit/commit/155d468ec5973a5bd3ab9c66e7981aaa544f6717) Thanks [@CarsonRoscoe](https://github.com/CarsonRoscoe)! - Added support for Privy Evm embedded wallets with delegation. (Thanks @njokuScript!)
+
+  This change introduces a new wallet provider, `PrivyEvmDelegatedEmbeddedWalletProvider`, which allows AgentKit to use Privy's embedded wallets that have been delegated to a server. This enables autonomous agents to perform onchain actions on behalf of users who have delegated transaction signing authority to the agent.
+
+  Key changes:
+
+  - Add `PrivyEvmDelegatedEmbeddedWalletProvider` class extending the `EvmWalletProvider` base class
+  - Update the `PrivyWalletProvider` factory to support embedded wallets via a new `walletType` option
+
+### Patch Changes
+
+- [#619](https://github.com/coinbase/agentkit/pull/619) [`6514e0c`](https://github.com/coinbase/agentkit/commit/6514e0c2fd561525092deafc231853182d9a7d1e) Thanks [@stat](https://github.com/stat)! - Add a new Messari action provider that enables AI agents to query the Messari AI toolkit for crypto market research data.
+
+## 0.4.0
+
+### Minor Changes
+
+- [#513](https://github.com/coinbase/agentkit/pull/513) [`e826563`](https://github.com/coinbase/agentkit/commit/e826563297aeda2ecfdb7d600ea5ed3711a62eff) Thanks [@stat](https://github.com/stat)! - Added defillama action provider for find protocol, get protocol, and get token price
+
+### Patch Changes
+
+- [#573](https://github.com/coinbase/agentkit/pull/573) [`81b35a2`](https://github.com/coinbase/agentkit/commit/81b35a23916b2c344972fd1bcb0cbb85d01b2cbd) Thanks [@John-peterson-coinbase](https://github.com/John-peterson-coinbase)! - Fixed bug in Morpho action provider to allow depositing ERC20 tokens of variable decimal precision
+
+## 0.3.0
+
+### Minor Changes
+
+- [#261](https://github.com/coinbase/agentkit/pull/261) [`674f6c8`](https://github.com/coinbase/agentkit/commit/674f6c83f12a081c2fd605e1bff094bbb4744c1c) Thanks [@phdargen](https://github.com/phdargen)! - Added a new action provider to interact with OpenSea
+
+- [#115](https://github.com/coinbase/agentkit/pull/115) [`9261c42`](https://github.com/coinbase/agentkit/commit/9261c42e91fecbd6b384856cdfc7ad230ce6f73e) Thanks [@fernandofcampos](https://github.com/fernandofcampos)! - Added `alloraActionProvider` to fetch inferences from Allora Network.
+
+## [0.2.3] - 2025-02-28
+
+### Added
+
+- [#392](https://github.com/coinbase/agentkit/pull/392) [`c5c1513`](https://github.com/coinbase/agentkit/commit/c5c1513933626bd6aef42652a875accb0c95d82e) Thanks [@mikeghen](https://github.com/mikeghen)! - Added `compoundActionProvider` to interact with Compound protocol on Base.
+
+- [#465](https://github.com/coinbase/agentkit/pull/465) [`165360a`](https://github.com/coinbase/agentkit/commit/165360a108ccf1ce1142ebba875c86fbaa823a6c) Thanks [@CarsonRoscoe](https://github.com/CarsonRoscoe)! - Added SmartWalletProvider powered by CDP Smart Wallets
+
+- [#487](https://github.com/coinbase/agentkit/pull/487) [`37d7083`](https://github.com/coinbase/agentkit/commit/37d70831cb0cfe1addb6a61c420c2a8d296bd64e) Thanks [@0xRAG](https://github.com/0xRAG)! - bump @coinbase/coinbase-sdk for support for Ed25519 API keys
+
+### Fixed
+
+- [#486](https://github.com/coinbase/agentkit/pull/486) [`bc4d4d2`](https://github.com/coinbase/agentkit/commit/bc4d4d219b706c4902ff402de49aae3d11c11952) Thanks [@stat](https://github.com/stat)! - use network id from saved wallet
+
+- [#488](https://github.com/coinbase/agentkit/pull/488) [`d12bc8e`](https://github.com/coinbase/agentkit/commit/d12bc8e29c8a4dd8b36788e4e244eca7eddd575e) Thanks [@John-peterson-coinbase](https://github.com/John-peterson-coinbase)! - Fixed under-reporting CDP API metrics bug by properly adding source and source version when configuring the CDP SDK
+
+- [#467](https://github.com/coinbase/agentkit/pull/467) [008f871](https://github.com/coinbase/agentkit/commit/008f871d1c9ebf4fcb5600584b066bdc6d69c8b9) Thanks [0xRAG](https://github.com/0xRAG)! - Fixed erc20 `get_balance` action to format erc20 balance with correct number of decimals.
 
 ## [0.2.2] - 2025-02-19
 

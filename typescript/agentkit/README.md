@@ -30,6 +30,7 @@ AgentKit is a framework for easily enabling AI agents to take actions onchain. I
   - [PrivyWalletProvider](#privywalletprovider)
     - [Authorization Keys](#authorization-keys)
     - [Exporting Privy Wallet information](#exporting-privy-wallet-information)
+  - [SmartWalletProvider](#smartwalletprovider)
 - [SVM Wallet Providers](#svm-wallet-providers)
   - [SolanaKeypairWalletProvider](#solanakeypairwalletprovider)
     - [Network Configuration](#solana-network-configuration)
@@ -136,6 +137,19 @@ const agent = createReactAgent({
 
 ## Action Providers
 <details>
+<summary><strong>Across</strong></summary>
+<table width="100%">
+<tr>
+    <td width="200"><code>bridge_token</code></td>
+    <td width="768">Bridges tokens between supported chains using Across Protocol.</td>
+</tr>
+<tr>
+    <td width="200"><code>check_deposit_status</code></td>
+    <td width="768">Checks the status of a cross-chain bridge deposit on the Across Protocol (mainnet networks only).</td>
+</tr>
+</table>
+</details>
+<details>
 <summary><strong>Basename</strong></summary>
 <table width="100%">
 <tr>
@@ -162,6 +176,48 @@ const agent = createReactAgent({
 <tr>
     <td width="200"><code>trade</code></td>
     <td width="768">Executes a token swap between two assets at current market rates on mainnet networks.</td>
+</tr>
+</table>
+</details>
+<details>
+<summary><strong>Compound</strong></summary>
+<table width="100%">
+<tr>
+    <td width="200"><code>supply</code></td>
+    <td width="768">Supplies collateral assets (WETH, CBETH, CBBTC, WSTETH, or USDC) to Compound.</td>
+</tr>
+<tr>
+    <td width="200"><code>withdraw</code></td>
+    <td width="768">Withdraws previously supplied collateral assets from Compound.</td>
+</tr>
+<tr>
+    <td width="200"><code>borrow</code></td>
+    <td width="768">Borrows base assets (WETH or USDC) from Compound using supplied collateral.</td>
+</tr>
+<tr>
+    <td width="200"><code>repay</code></td>
+    <td width="768">Repays borrowed assets back to Compound.</td>
+</tr>
+<tr>
+    <td width="200"><code>get_portfolio</code></td>
+    <td width="768">Retrieves portfolio details including collateral balances and borrowed amounts.</td>
+</tr>
+</table>
+</details>
+<details>
+<summary><strong>DefiLlama</strong></summary>
+<table width="100%">
+<tr>
+    <td width="200"><code>find_protocol</code></td>
+    <td width="768">Searches for DeFi protocols on DefiLlama by name, returning protocol metadata including TVL, chain, and category.</td>
+</tr>
+<tr>
+    <td width="200"><code>get_protocol</code></td>
+    <td width="768">Fetches detailed information about a specific protocol from DefiLlama, including TVL, description, and historical data.</td>
+</tr>
+<tr>
+    <td width="200"><code>get_token_prices</code></td>
+    <td width="768">Fetches current token prices from DefiLlama for specified token addresses with chain prefixes.</td>
 </tr>
 </table>
 </details>
@@ -209,6 +265,15 @@ const agent = createReactAgent({
 </table>
 </details>
 <details>
+<summary><strong>Messari</strong></summary>
+<table width="100%">
+<tr>
+    <td width="200"><code>research_question</code></td>
+    <td width="768">Queries Messari AI for comprehensive crypto research across news, market data, protocol information, and more.</td>
+</tr>
+</table>
+</details>
+<details>
 <summary><strong>Morpho</strong></summary>
 <table width="100%">
 <tr>
@@ -218,6 +283,19 @@ const agent = createReactAgent({
 <tr>
     <td width="200"><code>withdraw</code></td>
     <td width="768">Withdraws a specified amount of assets from a designated Morpho Vault.</td>
+</tr>
+</table>
+</details>
+<details>
+<summary><strong>Opensea</strong></summary>
+<table width="100%">
+<tr>
+    <td width="200"><code>list_nft</code></td>
+    <td width="768">Lists an NFT for sale on OpenSea.</td>
+</tr>
+<tr>
+    <td width="200"><code>get_nfts_by_account</code></td>
+    <td width="768">Fetches NFTs owned by a specific wallet address on OpenSea.</td>
 </tr>
 </table>
 </details>
@@ -568,23 +646,60 @@ const walletProvider = new ViemWalletProvider(client, {
 
 ### PrivyWalletProvider
 
-The `PrivyWalletProvider` is a wallet provider that uses [Privy Server Wallets](https://docs.privy.io/guide/server-wallets/). This implementation extends the `ViemWalletProvider`.
+The `PrivyWalletProvider` is a wallet provider that uses [Privy Server Wallets](https://docs.privy.io/guide/server-wallets/) or [Privy Embedded Wallets](https://docs.privy.io/guide/embedded-wallets/). This implementation extends the `EvmWalletProvider`.
+
+#### Server Wallet Configuration
 
 ```typescript
-import { PrivyWalletProvider, PrivyWalletConfig } from "@coinbase/agentkit";
+import { PrivyWalletProvider } from "@coinbase/agentkit";
 
-// Configure Wallet Provider
-const config: PrivyWalletConfig = {
+// Configure Server Wallet Provider
+const config = {
     appId: "PRIVY_APP_ID",
     appSecret: "PRIVY_APP_SECRET",
     chainId: "84532", // base-sepolia
     walletId: "PRIVY_WALLET_ID", // optional, otherwise a new wallet will be created
-    authorizationPrivateKey: PRIVY_WALLET_AUTHORIZATION_PRIVATE_KEY, // optional, required if your account is using authorization keys
-    authorizationKeyId: PRIVY_WALLET_AUTHORIZATION_KEY_ID, // optional, only required to create a new wallet if walletId is not provided
+    authorizationPrivateKey: "PRIVY_WALLET_AUTHORIZATION_PRIVATE_KEY", // optional, required if your account is using authorization keys
+    authorizationKeyId: "PRIVY_WALLET_AUTHORIZATION_KEY_ID", // optional, only required to create a new wallet if walletId is not provided
 };
 
 const walletProvider = await PrivyWalletProvider.configureWithWallet(config);
 ```
+
+#### Delegated Embedded Wallet Configuration
+
+You can also use Privy's embedded wallets with delegation for agent actions. This allows your agent to use wallets that have been delegated transaction signing authority by users.
+
+```typescript
+import { PrivyWalletProvider } from "@coinbase/agentkit";
+
+// Configure Embedded Wallet Provider
+const config = {
+    appId: "PRIVY_APP_ID",
+    appSecret: "PRIVY_APP_SECRET",
+    authorizationPrivateKey: "PRIVY_WALLET_AUTHORIZATION_PRIVATE_KEY",
+    walletId: "PRIVY_DELEGATED_WALLET_ID", // The ID of the wallet that was delegated to your server
+    networkId: "base-mainnet", // or any supported network
+    walletType: "embedded" // Specify "embedded" to use the embedded wallet provider
+};
+
+const walletProvider = await PrivyWalletProvider.configureWithWallet(config);
+```
+
+### Prerequisites
+
+Before using this wallet provider, you need to:
+
+1. Set up Privy in your application
+2. Enable server delegated actions
+3. Have users delegate permissions to your server
+4. Obtain the delegated wallet ID
+
+For more information on setting up Privy and enabling delegated actions, see [Privy's documentation](https://docs.privy.io/guide/embedded/server-delegated-actions).
+
+### Supported Operations
+
+The `PrivyEvmDelegatedEmbeddedWalletProvider` supports all standard wallet operations including transaction signing, message signing, and native transfers, using the wallet that was delegated to your server.
 
 #### Authorization Keys
 
@@ -601,12 +716,41 @@ The `PrivyWalletProvider` can export wallet information by calling the `exportWa
 ```typescript
 const walletData = await walletProvider.exportWallet();
 
-// walletData will be in the following format:
+// For server wallets, walletData will be in the following format:
 {
     walletId: string;
     authorizationKey: string | undefined;
     chainId: string | undefined;
 }
+
+// For embedded wallets, walletData will be in the following format:
+{
+    walletId: string;
+    networkId: string;
+    chainId: string | undefined;
+}
+```
+
+### SmartWalletProvider
+
+The `SmartWalletProvider` is a wallet provider that uses [CDP Smart Wallets](https://docs.cdp.coinbase.com/wallet-api/docs/smart-wallets).
+
+```typescript
+import { SmartWalletProvider, SmartWalletConfig } from "@coinbase/agentkit";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+const networkId = process.env.NETWORK_ID || "base-sepolia";
+
+const privateKey = process.env.PRIVATE_KEY || generatePrivateKey();
+const signer = privateKeyToAccount(privateKey);
+
+// Configure Wallet Provider
+const walletProvider = await SmartWalletProvider.configureWithWallet({
+  networkId,
+  signer,
+  smartWalletAddress: undefined, // If not provided a new smart wallet will be created
+  paymasterUrl: undefined, // Sponsor transactions: https://docs.cdp.coinbase.com/paymaster/docs/welcome
+});
 ```
 
 ## SVM Wallet Providers

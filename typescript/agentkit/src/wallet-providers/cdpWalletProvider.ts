@@ -11,6 +11,11 @@ import {
   keccak256,
   Signature,
   PublicClient,
+  Abi,
+  ContractFunctionName,
+  ContractFunctionArgs,
+  Address,
+  Hex,
 } from "viem";
 import { EvmWalletProvider } from "./evmWalletProvider";
 import { Network } from "../network";
@@ -147,13 +152,13 @@ export class CdpWalletProvider extends EvmWalletProvider {
         sourceVersion: version,
       });
     } else {
-      Coinbase.configureFromJson();
+      Coinbase.configureFromJson({ source: "agentkit", sourceVersion: version });
     }
 
     let wallet: Wallet;
 
     const mnemonicPhrase = config.mnemonicPhrase || process.env.MNEMONIC_PHRASE;
-    const networkId = config.networkId || process.env.NETWORK_ID || Coinbase.networks.BaseSepolia;
+    let networkId = config.networkId || process.env.NETWORK_ID || Coinbase.networks.BaseSepolia;
 
     try {
       if (config.wallet) {
@@ -161,6 +166,7 @@ export class CdpWalletProvider extends EvmWalletProvider {
       } else if (config.cdpWalletData) {
         const walletData = JSON.parse(config.cdpWalletData) as WalletData;
         wallet = await Wallet.import(walletData);
+        networkId = wallet.getNetworkId();
       } else if (mnemonicPhrase) {
         wallet = await Wallet.import({ mnemonicPhrase: mnemonicPhrase }, networkId);
       } else {
@@ -425,8 +431,14 @@ export class CdpWalletProvider extends EvmWalletProvider {
    * @param params - The parameters to read the contract.
    * @returns The response from the contract.
    */
-  async readContract(params: ReadContractParameters): Promise<ReadContractReturnType> {
-    return this.#publicClient!.readContract(params);
+  async readContract<
+    const abi extends Abi | readonly unknown[],
+    functionName extends ContractFunctionName<abi, "pure" | "view">,
+    const args extends ContractFunctionArgs<abi, "pure" | "view", functionName>,
+  >(
+    params: ReadContractParameters<abi, functionName, args>,
+  ): Promise<ReadContractReturnType<abi, functionName, args>> {
+    return this.#publicClient!.readContract<abi, functionName, args>(params);
   }
 
   /**
@@ -544,5 +556,53 @@ export class CdpWalletProvider extends EvmWalletProvider {
     }
 
     return this.#cdpWallet.export();
+  }
+
+  /**
+   * Gets the wallet.
+   *
+   * @returns The wallet.
+   */
+  getWallet(): Wallet {
+    if (!this.#cdpWallet) {
+      throw new Error("Wallet not initialized");
+    }
+    return this.#cdpWallet;
+  }
+
+  /**
+   * ERC20 transfer method
+   *
+   * @param assetId - The asset ID to transfer. Either USDC, CBBTC or EURC
+   * @param destination - The destination address
+   * @param amount - The amount to transfer
+   * @returns The transaction hash
+   */
+  async gaslessERC20Transfer(
+    assetId:
+      | typeof Coinbase.assets.Usdc
+      | typeof Coinbase.assets.Cbbtc
+      | typeof Coinbase.assets.Eurc,
+    destination: Address,
+    amount: bigint,
+  ): Promise<Hex> {
+    if (!this.#cdpWallet) {
+      throw new Error("Wallet not initialized");
+    }
+
+    const transferResult = await this.#cdpWallet.createTransfer({
+      amount,
+      assetId,
+      destination,
+      gasless: true,
+    });
+
+    const result = await transferResult.wait();
+
+    if (!result.getTransactionHash()) {
+      throw new Error("Transaction hash not found");
+    }
+
+    return result.getTransactionHash() as Hex;
   }
 }
